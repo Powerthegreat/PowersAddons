@@ -4,6 +4,6 @@
 ## Notes: Add FFXIV style durability bars to the character panel
 ## OptionalDeps: 
 ## SavedVariables: 
-## Version: v1.1
+## Version: v1.1.1
 
 addon.lua
