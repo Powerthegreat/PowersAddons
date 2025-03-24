@@ -1,9 +1,9 @@
-## Interface: 11503
+## Interface: 11506
 ## Title: FFXIV Style Durability Bars
 ## Author: Powerthegreat
 ## Notes: Add FFXIV style durability bars to the character panel
 ## OptionalDeps: 
 ## SavedVariables: 
-## Version: v1.1.1
+## Version: v1.1.2
 
 addon.lua
