@@ -1,4 +1,6 @@
 # FFXIV Style Durability Bars
+### 1.1.3
+* Updated .tocs for Classic interface version 11507, MOP interface version 50500, TWW interface version 110107
 ### 1.1.2
 * Updated .tocs for Classic interface version 11506, Cata interface version 40402, TWW interface version 110100
 ### 1.1.1
