@@ -1,9 +1,11 @@
-## Interface: 110107
+## Interface: 120000, 50503, 20505, 11508
 ## Title: FFXIV Style Durability Bars
 ## Author: Powerthegreat
 ## Notes: Add FFXIV style durability bars to the character panel
 ## OptionalDeps: 
-## SavedVariables: 
-## Version: v1.1.3
+## SavedVariables: FFXIVDurabilityBarsDB
+## Version: v1.2.0
+
+embeds.xml
 
 addon.lua

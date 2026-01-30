@@ -1,5 +1,51 @@
-FFXIVDurabilityBarsAddOn = {};
+FFXIVDurabilityBarsAddOn = LibStub("AceAddon-3.0"):NewAddon("FFXIVDurabilityBars")
 local addon = FFXIVDurabilityBarsAddOn
+
+local ffxivDuraOptions = {
+	name = "FFXIV Durability Bars",
+	handler = addon,
+	type = "group",
+	childGroups = "tab",
+	args = {
+		settingsTab = {
+			type = "group",
+			name = "Settings",
+			order = 1,
+			inline = true,
+			args = {
+				showDurabilityFreeBars = {
+					type = "toggle",
+					name = "Show Durability Free Bars",
+					desc = "Should durability bars be shown for items without durability? (eg. trinkets, cloak...)",
+					set = function(info, input) addon.db.profile.showDurabilityFreeBars = input end,
+					get = function(info) return addon.db.profile.showDurabilityFreeBars end,
+				},
+				useQualityColours = {
+					type = "toggle",
+					name = "Use Quality Colours",
+					desc = "Should durability bars use the quality/rarity colour of the items?",
+					set = function(info, input) addon.db.profile.useQualityColours = input end,
+					get = function(info) return addon.db.profile.useQualityColours end,
+				},
+				useGreenWhenDamaged = {
+					type = "toggle",
+					name = "Use Green When Damaged",
+					desc = "Should durability bars use green instead of another colour when damaged?",
+					set = function(info, input) addon.db.profile.useGreenWhenDamaged = input end,
+					get = function(info) return addon.db.profile.useGreenWhenDamaged end,
+				},
+			},
+		},
+	},
+}
+
+local defaults = {
+	profile = {
+		showDurabilityFreeBars = true,
+		useQualityColours = true,
+		useGreenWhenDamaged = false,
+	}
+}
 
 function addon:SetLinePoints(line, frame, durability, maxDurability, side)
 	-- Calculate the endpoint of a bar based on its proportional durability
@@ -31,13 +77,6 @@ function addon:AddDurabilityBarToSlot(button, side)
 		button.ffxivDurabilityBarBG:SetDrawLayer("BACKGROUND")
 		addon:SetLinePoints(button.ffxivDurabilityBarBG, overlayFrame, 1, 1, side)
 
-		-- This was a string used for testing, just to get something on screen
-		-- SetFormattedText below was used with this to set what to display and what colour to display it in
-		-- (using rich text style hex codes of the format |cAARRGGBB, and |r at the end to reset)
-		--button.ffxivDurabilityBar = overlayFrame:CreateFontString(nil, "OVERLAY")
-		--button.ffxivDurabilityBar:Hide()
-		--button.ffxivDurabilityBar:SetAllPoints()
-		--button.ffxivDurabilityBar:SetFontObject(NumberFontNormal)
 		button.ffxivDurabilityBar = overlayFrame:CreateLine()
 		button.ffxivDurabilityBar:Hide()
 		button.ffxivDurabilityBar:SetThickness(2)
@@ -47,28 +86,41 @@ function addon:AddDurabilityBarToSlot(button, side)
 	if button:GetID() >= INVSLOT_FIRST_EQUIPPED and button:GetID() <= INVSLOT_LAST_EQUIPPED then
 		local item = Item:CreateFromEquipmentSlot(button:GetID())
 		if (item:GetItemID()) then
-			local durability, maxDura = GetInventoryItemDurability(button:GetID())
-			if durability and maxDura then
-				--local r, g, b, hex = C_Item.GetItemQualityColor(2)
-				local r, g, b, hex = C_Item.GetItemQualityColor(3)
+			local colour
+			local r, g, b
+			if (addon.db.profile.useQualityColours) then
+				GetInventoryItemQuality("player", button:GetID())
+				colour = GetInventoryItemQuality("player", button:GetID()) -- Using this over GetItemInfo(item:GetItemID()) because of upgradable items - they return their base rarity rather than the one equipped
+				r, g, b = C_Item.GetItemQualityColor(colour)
 				button.ffxivDurabilityBar:SetColorTexture(r, g, b)
+			end
+			
+			local durability, maxDura = GetInventoryItemDurability(button:GetID())
+			if durability and maxDura then -- Items with durability, whether full or not
+				if (not addon.db.profile.useQualityColours) then
+					r, g, b = C_Item.GetItemQualityColor(3)
+					button.ffxivDurabilityBar:SetColorTexture(r, g, b)
+				end
 				if durability == 0 then
 					button.ffxivDurabilityBar:SetColorTexture(1, 0, 0)
-				elseif durability < maxDura then
-					--hex = "ff00ff00"
+				elseif durability < maxDura and addon.db.profile.useGreenWhenDamaged then
 					button.ffxivDurabilityBar:SetColorTexture(0, 1, 0)
 				end
-				--button.ffxivDurabilityBar:SetFormattedText("|c%s%s/%s|r", hex, durability, maxDura)
 				addon:SetLinePoints(button.ffxivDurabilityBar, button.ffxivDuraOverlay, durability, maxDura, side)
 				button.ffxivDurabilityBar:Show()
 				button.ffxivDurabilityBarBG:Show()
-			else
-				--local hex = "ffffff00"
-				--button.ffxivDurabilityBar:SetFormattedText("|c%sNope|r", hex)
-				button.ffxivDurabilityBar:SetColorTexture(1, 1, 0)
-				addon:SetLinePoints(button.ffxivDurabilityBar, button.ffxivDuraOverlay, 1, 1, side)
-				button.ffxivDurabilityBar:Show()
-				button.ffxivDurabilityBarBG:Show()
+			else -- Items that don't have durability
+				if (addon.db.profile.showDurabilityFreeBars) then
+					if (not addon.db.profile.useQualityColours) then
+						r = 1
+						g = 1
+						b = 0
+						button.ffxivDurabilityBar:SetColorTexture(r, g, b)
+					end
+					addon:SetLinePoints(button.ffxivDurabilityBar, button.ffxivDuraOverlay, 1, 1, side)
+					button.ffxivDurabilityBar:Show()
+					button.ffxivDurabilityBarBG:Show()
+				end
 			end
 		end
 	end
@@ -93,3 +145,10 @@ hooksecurefunc("PaperDollItemSlotButton_Update",
 		end
 		addon:AddDurabilityBarToSlot(button, side)
 	end)
+
+function addon:OnInitialize()
+	self.db = LibStub("AceDB-3.0"):New("FFXIVDurabilityBarsDB", defaults)
+	ffxivDuraOptions.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+	LibStub("AceConfig-3.0"):RegisterOptionsTable("FFXIVDurabilityBars", ffxivDuraOptions)
+	self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("FFXIVDurabilityBars", "FFXIV Durability Bars")
+end
