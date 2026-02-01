@@ -1,4 +1,6 @@
 # FFXIV Style Durability Bars
+### 1.2.2
+* Fixed combat tooltip errors
 ### 1.2.1
 * Updated .tocs for Midnight interface version 120001
 * Durability percentages in tooltips
