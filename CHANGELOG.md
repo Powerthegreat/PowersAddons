@@ -1,4 +1,6 @@
 # FFXIV Style Durability Bars
+### 1.2.3
+* ACTUALLY fixed combat tooltip errors
 ### 1.2.2
 * Fixed combat tooltip errors
 ### 1.2.1
