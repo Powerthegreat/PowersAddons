@@ -146,9 +146,23 @@ hooksecurefunc("PaperDollItemSlotButton_Update",
 		addon:AddDurabilityBarToSlot(button, side)
 	end)
 
+function addon:AddDurabilityPercentToTooltip(tooltip, data)
+    if tooltip == GameTooltip and (string.sub(data.leftText,1,string.len("Durability")) == "Durability") then
+		local duraString = string.sub(data.leftText,string.len("Durability ") + 1)
+		local duraNums = {}
+		for str in string.gmatch(duraString,"%d+") do
+			table.insert(duraNums, tonumber(str))
+		end
+		local duraPercent = duraNums[1] / duraNums[2] * 100
+		data.leftText = data.leftText .. " (" .. string.format("%.1f", duraPercent) .. "%)"
+	end
+end
+
 function addon:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("FFXIVDurabilityBarsDB", defaults)
 	ffxivDuraOptions.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("FFXIVDurabilityBars", ffxivDuraOptions)
 	self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("FFXIVDurabilityBars", "FFXIV Durability Bars")
+	
+	TooltipDataProcessor.AddLinePreCall(Enum.TooltipDataType.Item, function(tooltip, data) addon:AddDurabilityPercentToTooltip(tooltip, data) end)
 end
