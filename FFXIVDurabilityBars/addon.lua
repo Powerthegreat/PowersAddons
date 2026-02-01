@@ -148,7 +148,7 @@ hooksecurefunc("PaperDollItemSlotButton_Update",
 
 function addon:AddDurabilityPercentToTooltip(tooltip, data)
 	if not InCombatLockdown() then
-    	if tooltip == GameTooltip and (string.sub(data.leftText,1,string.len("Durability")) == "Durability") then
+    	if tooltip == GameTooltip and not data.leftText and string.len(data.leftText) > 10 and (string.sub(data.leftText,1,string.len("Durability")) == "Durability") then
 			local duraString = string.sub(data.leftText,string.len("Durability ") + 1)
 			local duraNums = {}
 			for str in string.gmatch(duraString,"%d+") do

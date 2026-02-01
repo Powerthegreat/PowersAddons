@@ -1,4 +1,6 @@
 # FFXIV Style Durability Bars
+### 1.2.4
+* Really properly actually finally fixed tooltip errors WHY ARE THEY SO EASY TO CAUSE
 ### 1.2.3
 * ACTUALLY fixed combat tooltip errors
 ### 1.2.2
