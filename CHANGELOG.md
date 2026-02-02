@@ -1,4 +1,6 @@
 # FFXIV Style Durability Bars
+### 1.2.5
+* Let's try this again because I broke the percentages...
 ### 1.2.4
 * Really properly actually finally fixed tooltip errors WHY ARE THEY SO EASY TO CAUSE
 ### 1.2.3
