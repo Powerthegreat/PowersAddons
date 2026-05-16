@@ -1,4 +1,7 @@
 # FFXIV Style Durability Bars
+### 1.2.6
+* Updated .tocs for MOP interface version 50504, Midnight interface versions 120005 and 120007
+* Finally learned that you can actually check for a secret value
 ### 1.2.5
 * Let's try this again because I broke the percentages...
 ### 1.2.4
