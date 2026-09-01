@@ -147,17 +147,40 @@ hooksecurefunc("PaperDollItemSlotButton_Update",
 	end)
 
 function addon:AddDurabilityPercentToTooltip(tooltip, data)
+	-- Retail durability percentages
 	if not InCombatLockdown() then
-    	if tooltip == GameTooltip and data.leftText and not issecretvalue(data.leftText) and string.len(data.leftText) > 10 and (string.sub(data.leftText,1,string.len("Durability")) == "Durability") then
-			local duraString = string.sub(data.leftText,string.len("Durability ") + 1)
-			local duraNums = {}
-			for str in string.gmatch(duraString,"%d+") do
-				table.insert(duraNums, tonumber(str))
-			end
-			local duraPercent = duraNums[1] / duraNums[2] * 100
-			data.leftText = data.leftText .. " (" .. string.format("%.1f", duraPercent) .. "%)"
+		if tooltip == GameTooltip and data.leftText then
+			data.leftText = addon:AppendDurabilityPercentString(data.leftText)
 		end
 	end
+end
+
+function addon:AddDurabilityPercentToTooltipClassic(tooltip)
+	-- Non-retail durability percentages
+	if tooltip then
+		local numLines = tooltip:NumLines()
+		if numLines == 0 then
+			return
+		end
+		
+		for line = 1, numLines do
+			GameTooltip:GetLeftLine(line):SetText(addon:AppendDurabilityPercentString(GameTooltip:GetLeftLine(line):GetText()))
+		end
+	end
+end
+
+function addon:AppendDurabilityPercentString(text)
+	-- Append the percentage to a durability line
+	if text and not issecretvalue(text) and string.len(text) > 10 and (string.sub(text,1,string.len("Durability")) == "Durability") then
+		local duraString = string.sub(text,string.len("Durability ") + 1)
+		local duraNums = {}
+		for str in string.gmatch(duraString,"%d+") do
+			table.insert(duraNums, tonumber(str))
+		end
+		local duraPercent = duraNums[1] / duraNums[2] * 100
+		return text .. " (" .. string.format("%.1f", duraPercent) .. "%)"
+	end
+	return text
 end
 
 function addon:OnInitialize()
@@ -165,6 +188,11 @@ function addon:OnInitialize()
 	ffxivDuraOptions.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("FFXIVDurabilityBars", ffxivDuraOptions)
 	self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("FFXIVDurabilityBars", "FFXIV Durability Bars")
-	
-	TooltipDataProcessor.AddLinePreCall(Enum.TooltipDataType.Item, function(tooltip, data) addon:AddDurabilityPercentToTooltip(tooltip, data) end)
+
+	local buildVersion, buildNumber, buildDate, interfaceVersion = GetBuildInfo()
+	if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPreCall and interfaceVersion > 100000 then
+		TooltipDataProcessor.AddLinePreCall(Enum.TooltipDataType.Item, function(tooltip, data) addon:AddDurabilityPercentToTooltip(tooltip, data) end)
+	elseif GameTooltip.HookScript then
+		GameTooltip:HookScript("OnTooltipSetItem", function(tooltip) addon:AddDurabilityPercentToTooltipClassic(tooltip) end)
+	end
 end
