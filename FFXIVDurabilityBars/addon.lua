@@ -191,7 +191,7 @@ function addon:OnInitialize()
 
 	local buildVersion, buildNumber, buildDate, interfaceVersion = GetBuildInfo()
 	if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPreCall and interfaceVersion > 100000 then
-		TooltipDataProcessor.AddLinePreCall(Enum.TooltipDataType.Item, function(tooltip, data) addon:AddDurabilityPercentToTooltip(tooltip, data) end)
+		TooltipDataProcessor.AddLinePreCall(Enum.TooltipDataType.Item, function(tooltip, data) securecall(function(tooltip, data) addon:AddDurabilityPercentToTooltip(tooltip, data) end) end)
 	elseif GameTooltip.HookScript then
 		GameTooltip:HookScript("OnTooltipSetItem", function(tooltip) addon:AddDurabilityPercentToTooltipClassic(tooltip) end)
 	end
