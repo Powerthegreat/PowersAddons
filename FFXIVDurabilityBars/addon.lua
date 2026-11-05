@@ -91,7 +91,11 @@ function addon:AddDurabilityBarToSlot(button, side)
 			if (addon.db.profile.useQualityColours) then
 				GetInventoryItemQuality("player", button:GetID())
 				colour = GetInventoryItemQuality("player", button:GetID()) -- Using this over GetItemInfo(item:GetItemID()) because of upgradable items - they return their base rarity rather than the one equipped
-				r, g, b = C_Item.GetItemQualityColor(colour)
+				if (colour) then
+					r, g, b = C_Item.GetItemQualityColor(colour)
+				else
+					r, g, b = C_Item.GetItemQualityColor(3)
+				end
 				button.ffxivDurabilityBar:SetColorTexture(r, g, b)
 			end
 			
@@ -190,8 +194,8 @@ function addon:OnInitialize()
 	self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("FFXIVDurabilityBars", "FFXIV Durability Bars")
 
 	local buildVersion, buildNumber, buildDate, interfaceVersion = GetBuildInfo()
-	if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPreCall and interfaceVersion > 100000 then
-		TooltipDataProcessor.AddLinePreCall(Enum.TooltipDataType.Item, function(tooltip, data) securecall(function(tooltip, data) addon:AddDurabilityPercentToTooltip(tooltip, data) end) end)
+	if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPreCall and (interfaceVersion > 100000 or (interfaceVersion > 16000 and interfaceVersion < 20000)) then
+		TooltipDataProcessor.AddLinePreCall(Enum.TooltipDataLineType.None, function(tooltip, data) securecall(addon.AddDurabilityPercentToTooltip, addon, tooltip, data) end)
 	elseif GameTooltip.HookScript then
 		GameTooltip:HookScript("OnTooltipSetItem", function(tooltip) addon:AddDurabilityPercentToTooltipClassic(tooltip) end)
 	end
